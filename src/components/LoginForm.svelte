@@ -1,33 +1,53 @@
-<script>
+<script lang="ts">
     import { createEventDispatcher } from 'svelte';
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const apiVersion = import.meta.env.VITE_API_VERSION;
+    let email = $state("");
+    let password = $state("");
 
     const dispatch = createEventDispatcher();
 
     async function closeLoginForm() {
-        try {
-          const response = await fetch(`http://localhost:5000/`); // NIE WIEM JAK DAC TU ENDPOINT
-        const data = await response.json();
-        console.log(data);
-        }catch (e) {
-          console.log(e)
-        }
         dispatch('close');
     }
 
     function openRegisterForm() {
         dispatch('register');
     }
+
+    async function handleSubmit(e: any) {
+      e.preventDefault();
+      const body = {
+        'email': email,
+        'password': password
+      };
+      console.log(apiUrl)
+      await fetch(`${apiUrl}${apiVersion}login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        }).then(response => {
+          response.json()
+          console.log(response)
+        }).catch(e => {
+          console.log(e)
+        })
+    }
 </script>
 
 <div class="overlay">
     <div class="login-form">
-        <button class="close-btn" on:click={closeLoginForm}>X</button>
+        <button class="close-btn" onclick={closeLoginForm}>X</button>
         <h2>Login</h2>
-        <input type="email" placeholder="Email">
-        <input type="password" placeholder="Password">
-        <button>LOGIN</button>
+        <form onsubmit={handleSubmit}>
+          <input type="email" placeholder="Email" bind:value={email}>
+          <input type="password" placeholder="Password" required bind:value={password}>
+          <button>LOGIN</button>
+        </form>
         <p><a href="#">Forgot Password?</a></p>
-        <p><a on:click={openRegisterForm}>Register</a></p>
+        <p><a onclick={openRegisterForm}>Register</a></p>
     </div>
 </div>
 
